@@ -21,7 +21,7 @@ You can customize this script for the uidtool however you’d like to meet the n
 # date: May 2024
 
 ###### VARIABLES ######
-company_name=""
+company_name="your_org_name"
 uid_database="/Library/Application Support/$company_name/.uid_database"
 # The starting ID can be changed to whatever value you'd like
 starting_uid="800"
@@ -111,10 +111,10 @@ You can choose where to save this file. I have it saved to `/Library/Application
 
 Run these commands on the file and save it to the location of your choice.
 ```
-chown root:wheel /Library/Application Support/Company_Name/scripts/logout.sh
-chmod 755 /Library/Application Support/Company_Name/scripts/logout.sh
-chmod +x /Library/Application Support/Company_Name/scripts/logout.sh
-xattr -cr /Library/Application Support/Company_Name/scripts/logout.sh
+chown root:wheel /Library/Application Support/$company_name/scripts/logout.sh
+chmod 755 /Library/Application Support/$company_name/scripts/logout.sh
+chmod +x /Library/Application Support/$company_name/scripts/logout.sh
+xattr -cr /Library/Application Support/$company_name/scripts/logout.sh
 ```
 
 Then drag this file from your desired location to Composer into the same project as the uidtool

@@ -17,7 +17,7 @@ eval "array=($users)"
 # for every user above UID 800 remove their dscl entry
 for user in "${array[@]}"; do
     # first verify that we are FOR SURE not going to be applying this for our protected users (none should be above 800 UID, but just incase)
-    if [[ "$user" == "$admin1" ]] || [[ "$user" == "$admin2" ]]; then
+    if [[ "$user" == $admin1 ]] || [[ "$user" == $admin2 ]]; then
         echo "$(date) :: Startup :: Protected Account Found: $user, skipping"
     else
         /usr/bin/dscl . -delete /Users/$user

@@ -1,8 +1,8 @@
 # uidtool
 
-This document provides step-by-step instructions for incorporating `/usr/local/sbin/uidtool` into a Jamf Connect configuration. The goal is to assign a unique user ID (UID) to every user who logs in through Jamf Connect, and store that UID in a flat text file for future reference.
+This document provides step-by-step instructions for incorporating `/usr/local/sbin/uidtool` into a Jamf Connect configuration. The goal is to assign a unique user ID (UID) to every user who logs in through Jamf Connect, and store that UID in a flat text file for future reference. This deployment was designed to be pushed out to Macs during the initial install of jamfConnect. *See the "Considerations" section at the bottom of this document for details about deploying this to Macs already running jamfConnect*
 
-Once a UID has been assigned, starting from 800 and counting upward, the user's entry can be removed from the Mac's internal directory service while preserving their home folder. By leaving the user's home folder intact, subsequent logins will consult the flat text file of UIDs and assign the same UID to the user, ensuring that permissions are aligned correctly for their home folder.
+Once a UID has been assigned, starting from 800 and counting upward, the user's entry can be removed from the Mac's internal directory service while preserving their home folder. By leaving the user's home folder intact, subsequent logins will consult the flat text file of UIDs and assign the same UID to the user, ensuring that permissions are aligned correctly for their home folder. 
 
 The desired outcome of using this tool is that if a user changes their domain account outside of the Mac, their local account will be removed after every logout or reboot, while still preserving their home folder and files. Every subsequent login will accept the user's current domain password and assign that to a new local account, relinking the home folder to the user.
 

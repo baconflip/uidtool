@@ -71,6 +71,8 @@ xattr -cr /usr/local/sbin/uidtool
 This is to ensure there are no quarantine tags or anything linked to this file you created
 Use composer and drag this file from that `/usr/local/sbin` location into Composer. 
 
+![Screenshot of Jamf Composer showing the layout of the PKG for uidtool](/composer_uidtool.png?raw=true "Screenshot of Composer")
+
 ## Creating the logout hook script for the PKG
 
 ```

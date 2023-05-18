@@ -17,7 +17,7 @@ starting_uid="800"
 ###### MAIN ######
 # ensure the company folder exists
 if [ -d "/Library/Application Support/$company_name/" ]; then
-	mkdir -p /Library/Application Support/$company_name
+	mkdir -p "/Library/Application Support/$company_name"
 fi
 
 # $1 is passed to this tool from jamfConnect containing the user’s username

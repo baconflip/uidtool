@@ -66,10 +66,10 @@ Customize this script however you’d like. This is going to be saved to the /us
 ```
 chown root:wheel /usr/local/sbin/uidtool
 chmod 755 /usr/local/sbin/uidtool
-xattr -cr /usr/local/sbin/uidtool 
+xattr -c /usr/local/sbin/uidtool 
 ```
-This is to ensure there are no quarantine tags or anything linked to this file you created
-Use composer and drag this file from that `/usr/local/sbin` location into Composer. 
+The `xattr` command is to ensure there are no quarantine tags or anything linked to this file you created
+Use composer and drag this file from that `/usr/local/sbin` location into Composer. Read the `xattr` man page [here]: https://ss64.com/osx/xattr.html
 
 ![Screenshot of Jamf Composer showing the layout of the PKG for uidtool](/composer_uidtool.png?raw=true "Screenshot of Composer")
 
@@ -116,7 +116,7 @@ Run these commands on the file and save it to the location of your choice.
 chown root:wheel /Library/Application Support/$company_name/scripts/logout.sh
 chmod 755 /Library/Application Support/$company_name/scripts/logout.sh
 chmod +x /Library/Application Support/$company_name/scripts/logout.sh
-xattr -cr /Library/Application Support/$company_name/scripts/logout.sh
+xattr -c /Library/Application Support/$company_name/scripts/logout.sh
 ```
 
 Then drag this file from your desired location to Composer into the same project as the uidtool

@@ -13,24 +13,31 @@ You can customize this script for the uidtool however you’d like to meet the n
 
 ```
 #!/bin/bash
+
 ######## ABOUT #########
 # This tool will start at UID 800 and increment
 # for every new user until the end of time
 # the uid_database will keep track of the users UID
+#
+# author: steven russell
+# date: May 2024
 
 ###### VARIABLES ######
-uid_database="/Library/Application Support/Company_Name/.uid_database"
+company_name=""
+uid_database="/Library/Application Support/$company_name/.uid_database"
+# The starting ID can be changed to whatever value you'd like
 starting_uid="800"
 
 ###### MAIN ######
 # ensure the company folder exists
-if [ -d “/Library/Application Support/Company_Name/” ]; then
-	mkdir -p /Library/Application Support/Company_Name
+if [ -d "/Library/Application Support/$company_name/" ]; then
+	mkdir -p "/Library/Application Support/$company_name"
 fi
 
 # $1 is passed to this tool from jamfConnect containing the user’s username
 # see if the user has an entry
 if [ -f "$uid_database" ]; then
+    # grabs the uid from the database for the user logging in
     database_uid=$(cat "$uid_database" | grep "$1" | cut -d "," -f2)
     if [ ! -z "$database_uid" ]; then
         echo "$database_uid"
@@ -53,6 +60,8 @@ if [ ! -f "$uid_database" ]; then
     printf "$1",${starting_uid}'\n' >> "$uid_database"
     echo "$starting_uid"
 fi
+
+exit 0
 ```
 
 Customize this script however you’d like. This is going to be saved to the /usr/local/sbin/ directory. Remove .sh and make sure the file is only stored as `uidtool`. Set the permissions to:
@@ -68,22 +77,25 @@ Use composer and drag this file from that `/usr/local/sbin` location into Compos
 
 ```
 #!/bin/bash
+
 ### ABOUT ###############################################################
 #   This script is going to run at startup on Jamf Connect Macs
 #   It is designed to look for any left over UID > 800 accounts
 #   It will remove them and make sure that they can login with their latest password
 #
-### By Steven Russell
+### By steven russell
 ########################################################################
-exec >> /Library/Logs/jamf_logout.log
+admin1="*-admin" #any admin account ending in -admin
+admin2="supercool_admin"
 
+exec >> /Library/Logs/jamf_logout.log
 ## Grab all the users with a UID above 800 (my UIDTool will make sure they are UID 800+)
 users=$(dscl . -list /Users UniqueID | awk '$2 > 799  {print $1}')
 eval "array=($users)"
 # for every user above UID 800 remove their dscl entry
 for user in "${array[@]}"; do
     # first verify that we are FOR SURE not going to be applying this for our protected users (none should be above 800 UID, but just incase)
-    if [[ "$user" == *-secureadmin ]] || [[ "$user" == "admin1" ]] || [[ "$user" == "admin2" ]]; then
+    if [[ "$user" == $admin1 ]] || [[ "$user" == $admin2 ]]; then
         echo "$(date) :: Startup :: Protected Account Found: $user, skipping"
     else
         /usr/bin/dscl . -delete /Users/$user
@@ -116,14 +128,24 @@ Creating the logout hook in the postinstall for the PKG
 ## postinstall
 # set the loginwindow preference
 
-defaults write /var/root/Library/Preferences/com.apple.loginwindow LogoutHook "/Library/Application Support/Company_Name/scripts/logout.sh"
+# set the company name
+company_name="your_org_name"
 
+# make sure hte directory exists
+if [ ! -d "/Library/Application Support/$company_name/scripts/" ]; then
+  mkdir -p "/Library/Application Support/$company_name/scripts/"
+fi
+
+# update the preference file
+defaults write /var/root/Library/Preferences/com.apple.loginwindow LogoutHook "/Library/Application Support/$company_name/scripts/logout.sh"
+
+# verify
 if [ "$(defaults read /var/root/Library/Preferences/com.apple.loginwindow LogoutHook; echo $?)" != 0 ]; then
 	echo "root loginwindow LogoutHook successfully updated"
 else
 	echo "An Unknown Error Occurred"
 	exit 1
-fi 
+fi
 ```
 
 # Configuring the jamfConnect Configuration Profile to use the UIDTool
@@ -163,7 +185,9 @@ I didn’t have to do this in my environment because we rolled this out at the s
 # prepare environment for Macs with Jamf Connect already deployed
 
 ## Grab all the users with a UID above 500
-company_name=”your_org_name”
+company_name="your_org_name"
+admin1="*-admin" #any admin account ending in -admin
+admin2="supercool_admin"
 users=$(dscl . -list /Users UniqueID | awk '$2 > 499  {print $1}')
 uid_database=”/Library/Application Support/$company_name/.uid_database”
 
@@ -171,13 +195,13 @@ uid_database=”/Library/Application Support/$company_name/.uid_database”
 eval "array=($users)"
 # for every user above UID 500 store their uid and username in the .uid_database
 for user in "${array[@]}"; do
-    if [[ "$user" == *-secureadmin ]] || [[ "$user" == "admin1" ]] || [[ "$user" == "admin2" ]]; then
+    if [[ "$user" == $admin1 ]] || [[ "$user" == $admin2 ]]; then
         echo "$(date) :: ignoring any accounts we do not want to added to this .uid_database"
     else
-	# adding user to the $uid_database file
+    	# adding user to the $uid_database file
 	user_id=$(id -u "$user")
 	# loops through all users and the \n will add a new line to each entry
-	echo “${user},${user_id}”\n >> “$uid_database”
+	printf "${user}","${user_id}"'\n' >> "$uid_database"
     fi
 done
 ```

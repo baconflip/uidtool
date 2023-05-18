@@ -1,0 +1,50 @@
+#!/bin/bash
+
+######## ABOUT #########
+# This tool will start at UID 800 and increment
+# for every new user until the end of time
+# the uid_database will keep track of the users UID
+#
+# author: steven russell
+# date: May 2024
+
+###### VARIABLES ######
+company_name=""
+uid_database="/Library/Application Support/$company_name/.uid_database"
+# The starting ID can be changed to whatever value you'd like
+starting_uid="800"
+
+###### MAIN ######
+# ensure the company folder exists
+if [ -d "/Library/Application Support/$company_name/" ]; then
+	mkdir -p /Library/Application Support/$company_name
+fi
+
+# $1 is passed to this tool from jamfConnect containing the user’s username
+# see if the user has an entry
+if [ -f "$uid_database" ]; then
+    # grabs the uid from the database for the user logging in
+    database_uid=$(cat "$uid_database" | grep "$1" | cut -d "," -f2)
+    if [ ! -z "$database_uid" ]; then
+        echo "$database_uid"
+        exit 0
+    fi
+fi
+
+#find the last UID in the list
+if [ -f "$uid_database" ]; then
+    last_uid=$(tail -n 1 "$uid_database" | cut -d "," -f2)
+    let "next_uid=last_uid+1"
+    # this records the uid this users has been assigned
+    printf "$1",${next_uid}'\n' >> "$uid_database"
+    # this echo command is what tells jamfConnect the UID to use
+    echo "$next_uid"
+fi
+
+#create the uid_database with the first user and the starting uid
+if [ ! -f "$uid_database" ]; then
+    printf "$1",${starting_uid}'\n' >> "$uid_database"
+    echo "$starting_uid"
+fi
+
+exit 0

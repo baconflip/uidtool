@@ -1,14 +1,12 @@
 # uidtool
-Designed for jamfConnect Macs. The desired outcome of using this tool is that if a user changes their domain account outside of the Mac, their local account will be removed after every logout or reboot, while still preserving their home folder and files so subsequent logins will relink their local account to their previously created home folder with correct permissions.
 
-# About
 This document provides step-by-step instructions for incorporating `/usr/local/sbin/uidtool` into a Jamf Connect configuration. The goal is to assign a unique user ID (UID) to every user who logs in through Jamf Connect, and store that UID in a flat text file for future reference.
 
 Once a UID has been assigned, starting from 800 and counting upward, the user's entry can be removed from the Mac's internal directory service while preserving their home folder. By leaving the user's home folder intact, subsequent logins will consult the flat text file of UIDs and assign the same UID to the user, ensuring that permissions are aligned correctly for their home folder.
 
 The desired outcome of using this tool is that if a user changes their domain account outside of the Mac, their local account will be removed after every logout or reboot, while still preserving their home folder and files. Every subsequent login will accept the user's current domain password and assign that to a new local account, relinking the home folder to the user.
 
-# Creating the UIDTool and adding it to a PKG
+## Creating the UIDTool and adding it to a PKG
 You can customize this script for the uidtool however you’d like to meet the needs of your organization:
 
 ```
@@ -73,7 +71,7 @@ xattr -cr /usr/local/sbin/uidtool
 This is to ensure there are no quarantine tags or anything linked to this file you created
 Use composer and drag this file from that `/usr/local/sbin` location into Composer. 
 
-# Creating the logout hook script for the PKG
+## Creating the logout hook script for the PKG
 
 ```
 #!/bin/bash
@@ -109,7 +107,7 @@ for user in "${array[@]}"; do
 done
 ```
 
-You can choose where to save this file. I have it saved to `/Library/Application Support/Company_Name/scripts/`
+You can choose where to save this file. I have it saved to `/Library/Application Support/$company_name/scripts/`
 
 Run these commands on the file and save it to the location of your choice.
 ```
@@ -148,7 +146,7 @@ else
 fi
 ```
 
-# Configuring the jamfConnect Configuration Profile to use the UIDTool
+## Configuring the jamfConnect Configuration Profile to use the UIDTool
 
 In the Configuration Profile, add this line to your existing configuration
 
@@ -167,18 +165,20 @@ In the Configuration Profile, add this line to your existing configuration
 
 _Note: The uidtool specified in the plist for the configuration profile. 
 
-# Considerations:
+## Considerations:
 Typically macOS will start assigning UID’s to local users starting at 501 and increase from there. If you apply this to Macs that already have accounts created and their UIDs are before 800. This will not apply to those accounts. 
 
 If you wanted to roll this out to previously deployed Macs that already have user accounts before UID 800, then we’d need to push out a script that will generate the .uid_database Ahead of time and we’d adjust the script to function on UIDs below 800.
 
 We could create a script to pre-deploy before applying this change that takes the UID of every local account above 501 and add them to the database which would look like this:
 
+```
 firstname,501
 seconduser,502
 thirduser,503
+```
 
-I didn’t have to do this in my environment because we rolled this out at the same time we rolled out Jamf Connect so we never had local accounts created without the user added to the .uid_database at login. The pre-deploy script could be like this. This is not tested and should be considered as a starting point:
+I didn’t have to do this in my environment because we rolled this out at the same time we rolled out Jamf Connect so we never had local accounts created without the user added to the `.uid_database` at login. The pre-deploy script could be like this. This is not tested and should be considered as a starting point:
 
 ```
 #!/bin/bash

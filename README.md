@@ -163,7 +163,7 @@ In the Configuration Profile, add this line to your existing configuration
 </plist>
 ```
 
-_Note: The uidtool specified in the plist for the configuration profile. 
+*Note: The uidtool specified in the plist for the configuration profile.*
 
 ## Considerations:
 Typically macOS will start assigning UID’s to local users starting at 501 and increase from there. If you apply this to Macs that already have accounts created and their UIDs are before 800. This will not apply to those accounts. 

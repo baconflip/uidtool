@@ -13,9 +13,9 @@ for user in "${array[@]}"; do
     if [[ "$user" == *-secureadmin ]] || [[ "$user" == "admin1" ]] || [[ "$user" == "admin2" ]]; then
         echo "$(date) :: ignoring any accounts we do not want to added to this .uid_database"
     else
-	      # adding user to the $uid_database file
-	      user_id=$(id -u "$user")
-	      # loops through all users and the \n will add a new line to each entry
-	      echo "${user},${user_id}"\n >> “$uid_database”
+    	# adding user to the $uid_database file
+	user_id=$(id -u "$user")
+	# loops through all users and the \n will add a new line to each entry
+	printf "${user}","${user_id}"'\n' >> "$uid_database"
     fi
 done

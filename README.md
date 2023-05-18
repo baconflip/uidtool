@@ -69,7 +69,7 @@ chmod 755 /usr/local/sbin/uidtool
 xattr -c /usr/local/sbin/uidtool 
 ```
 The `xattr` command is to ensure there are no quarantine tags or anything linked to this file you created
-Use composer and drag this file from that `/usr/local/sbin` location into Composer. Read the `xattr` man page [here]: https://ss64.com/osx/xattr.html
+Use composer and drag this file from that `/usr/local/sbin` location into Composer. Read the `xattr` man page here: https://ss64.com/osx/xattr.html
 
 ![Screenshot of Jamf Composer showing the layout of the PKG for uidtool](/composer_uidtool.png?raw=true "Screenshot of Composer")
 

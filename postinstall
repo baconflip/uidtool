@@ -1,0 +1,22 @@
+#!/bin/bash
+## postinstall
+# set the loginwindow preference
+
+# set the company name
+company_name="your_org_name"
+
+# make sure hte directory exists
+if [ ! -d "/Library/Application Support/$company_name/scripts/" ]; then
+  mkdir -p "/Library/Application Support/$company_name/scripts/"
+fi
+
+# update the preference file
+defaults write /var/root/Library/Preferences/com.apple.loginwindow LogoutHook "/Library/Application Support/$company_name/scripts/logout.sh"
+
+# verify
+if [ "$(defaults read /var/root/Library/Preferences/com.apple.loginwindow LogoutHook; echo $?)" != 0 ]; then
+	echo "root loginwindow LogoutHook successfully updated"
+else
+	echo "An Unknown Error Occurred"
+	exit 1
+fi

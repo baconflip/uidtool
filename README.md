@@ -123,9 +123,10 @@ chmod +x /Library/Application Support/$company_name/scripts/logout.sh
 xattr -c /Library/Application Support/$company_name/scripts/logout.sh
 ```
 
-Then drag this file from your desired location to Composer into the same project as the uidtool
-Next, you’ll create a postinstall script for the PKG ***must be postinstall*** and add the 
-Creating the logout hook in the postinstall for the PKG
+Put this file in the desired location, example above, then drag this to Composer into the same project as the uidtool. 
+
+### postinstall script for the package in Composer
+Next, click the triangle disclouse button under the package in Composer to show the "Scripts" folder. Right-click on the folder and create a postinstall script. Then paste in the script below and modify it for your environment ***must be postinstall*** and add the logout hook in the postinstall for the PKG
 
 ```
 #!/bin/bash
@@ -154,7 +155,7 @@ fi
 
 ## Configuring the jamfConnect Configuration Profile to use the UIDTool
 
-In the Configuration Profile, add this line to your existing configuration
+In the Configuration Profile, add this line to your existing configuration. 
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>

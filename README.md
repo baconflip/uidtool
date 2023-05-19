@@ -1,12 +1,10 @@
 # uidtool
 
-This document provides step-by-step instructions for incorporating `/usr/local/sbin/uidtool` into a Jamf Connect configuration. The goal is to assign a unique user ID (UID) to every user who logs in through Jamf Connect, and store that UID in a flat text file for future reference. This deployment was designed to be pushed out to Macs during the initial install of jamfConnect. *See the "Considerations" section at the bottom of this document for details about deploying this to Macs already running jamfConnect*
+This document provides instructions on how to incorporate `/usr/local/sbin/uidtool` into a Jamf Connect configuration, with the aim of assigning a unique user ID (UID) to every user logging in through Jamf Connect and storing it in a flat text file for future reference. This deployment is designed to be pushed out to Macs during the initial install of Jamf Connect. *Please see the 'Considerations' section at the end of this document prepare macs with Jamf Connect already deployed*
 
-Once a UID has been assigned, starting from 800 and counting upward, the user's account can be removed from the Mac's internal directory service while preserving their home folder. By leaving the user's home folder intact, subsequent logins will consult the flat text file of UIDs and assign the same UID to the user, ensuring that permissions are aligned correctly for their home folder. This has been proven to be very reliable, even after major OS upgrades.
+After assigning a UID, the user's account can be removed from the Mac's internal directory service, while preserving their home folder. This ensures that permissions are aligned correctly for their home folder without prompting the user to update their local account password at login, or if a forced password reset occurs for security purposes.
 
-The desired outcome of using this tool is that if a user changes their domain account outside of the Mac, their local account will be removed after every logout or reboot, while still preserving their home folder and files. Every subsequent login will accept the user's current domain password and assign that to a new local account, relinking the home folder to the user.
-
-These directions will cover how to create the logout hook to remove the users account after a logout. To have the accounts removed at reboot, you have to add the logout script in jamfPro and set a startup policy scoped to Jamf Connect Macs. There are edge cases where a user may hard-power off a Mac where a logout wouldn't occur so they can occur during the next reboot via the jamf policy. You can decide to not to use the startup policy.
+Upon logout, a script will execute to remove the user's local account, while keeping the home folder intact. The command used is `/usr/bin/dscl . -delete /users/$user`. However, keep in mind that there may be edge cases where a user may hard-power off a Mac where a logout wouldn't occur. If you'd like this to run at reboot as well, you can add the logout script in Jamf Pro as a startup policy scoped to Jamf Connect Macs to run at startup, on-going.
 
 ## Creating the UIDTool and adding it to a PKG
 You can customize this script for the uidtool however you’d like to meet the needs of your organization:
@@ -64,7 +62,7 @@ fi
 exit 0
 ```
 
-Customize this script however you’d like. This is going to be saved to the /usr/local/sbin/ directory. Remove .sh and make sure the file is only stored as `uidtool`. Set the permissions to:
+Customize this script however you’d like. This is going to be saved to the `/usr/local/sbin/` directory. Remove `.sh` and make sure the file is only stored as `uidtool`. Set the permissions to:
 ```
 chown root:wheel /usr/local/sbin/uidtool
 chmod 755 /usr/local/sbin/uidtool
@@ -126,7 +124,7 @@ xattr -c /Library/Application Support/$company_name/scripts/logout.sh
 Put this file in the desired location, example above, then drag this to Composer into the same project as the uidtool. 
 
 ### postinstall script for the package in Composer
-Next, click the triangle disclouse button under the package in Composer to show the "Scripts" folder. Right-click on the folder and create a postinstall script. Then paste in the script below and modify it for your environment ***must be postinstall*** and add the logout hook in the postinstall for the PKG
+Next, click the triangle disclouse button under the package in Composer to show the "Scripts" folder. Right-click on the folder, choose 'Add Shell Script', and create a postinstall script. Then paste in the script below and modify it for your environment ***must be postinstall*** and add the logout hook in the postinstall for the PKG.
 
 ```
 #!/bin/bash
@@ -170,8 +168,6 @@ In the Configuration Profile, add this line to your existing configuration.
 </plist>
 ```
 
-*Note: The uidtool specified in the plist for the configuration profile.*
-
 ## Considerations:
 Typically macOS will start assigning UID’s to local users starting at 501 and increase from there. If you apply this to Macs that already have accounts created and their UIDs are before 800. This will not apply to those accounts. 
 
@@ -199,11 +195,16 @@ users=$(dscl . -list /Users UniqueID | awk '$2 > 499  {print $1}')
 uid_database=”/Library/Application Support/$company_name/.uid_database”
 
 # first determine if this script has already run on this Mac, if so, exit
-eval "array=($users)"
+if [ -f "$uid_database" ]; then
+	echo "This pre-deply script has already run on this Mac. The uid_database file is found"
+	exit 0
+fi
+
 # for every user above UID 500 store their uid and username in the .uid_database
+eval "array=($users)"
 for user in "${array[@]}"; do
     if [[ "$user" == $admin1 ]] || [[ "$user" == $admin2 ]]; then
-        echo "$(date) :: ignoring any accounts we do not want to added to this .uid_database"
+        echo "Ignoring any accounts we do not want to added to this .uid_database"
     else
     	# adding user to the $uid_database file
 	user_id=$(id -u "$user")

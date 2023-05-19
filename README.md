@@ -6,7 +6,7 @@ After assigning a UID, the user's account can be removed from the Mac's internal
 
 Upon logout, a script will execute to remove the user's local account, while keeping the home folder intact. The command used is `/usr/bin/dscl . -delete /users/$user`. However, keep in mind that there may be edge cases where a user may hard-power off a Mac where a logout wouldn't occur. If you'd like this to run at reboot as well, you can add the logout script in Jamf Pro as a startup policy scoped to Jamf Connect Macs to run at startup, on-going.
 
-### *This tool is not intended to be used on Macs with FileVault enabled, its more for a shared lab situation*
+#### *This tool is not intended to be used on Macs with FileVault enabled, its more for a shared lab situation*
 
 ## Creating the UIDTool and adding it to a PKG
 You can customize this script for the uidtool however you’d like to meet the needs of your organization:
